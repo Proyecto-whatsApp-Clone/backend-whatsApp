@@ -35,10 +35,7 @@ export class UserService {
   }
 
   async findById(id: string): Promise<User | undefined> {
-    // Convertir el id recibido (string) a un ObjectId de MongoDB
     const objectId = new ObjectId(id);
-
-    // Usar el repositorio de TypeORM para buscar al usuario
     return await this.userRepository.findOne({
       where: { _id: objectId },
     });
@@ -48,7 +45,7 @@ export class UserService {
     return `This action updates a #${id} user`;
   }
 
-  remove(id: number) {
-    return `This action removes a #${id} user`;
+  async removeUser(id: string): Promise<void> {
+    await this.userRepository.delete(id);
   }
 }

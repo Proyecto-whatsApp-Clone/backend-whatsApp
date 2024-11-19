@@ -24,9 +24,17 @@ export class UserController {
     return user;
   }
 
-  @Patch(':id')
-  update(@Param('id') id: string, @Body() updateUserDto: UpdateUserDto) {
-    return this.userService.update(+id, updateUserDto);
+  @Get('number/:number')
+  async serachForNumber(@Param('number') number: string): Promise<User> {
+    const user = await this.userService.findByNumber(number);
+    return user;
+  }
+
+  @Patch('update/id/:id')
+  async update(
+    @Param('id') id: string,
+    @Body() updateUserDto: UpdateUserDto): Promise<User> {
+      return this.userService.updateUser(id, updateUserDto)
   }
 
   @Delete('delete/id/:id')

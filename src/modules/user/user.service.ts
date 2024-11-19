@@ -1,51 +1,50 @@
 import { Injectable } from '@nestjs/common';
+import { User } from './entities/user.entity';
+import { Model } from 'mongoose';
+import { InjectModel } from '@nestjs/mongoose';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
-import { User } from './entities/user.entity';
-import { EntityManager, Repository } from 'typeorm';
-import { ObjectId } from 'mongodb';
-import { InjectRepository } from '@nestjs/typeorm';
 
 @Injectable()
 export class UserService {
 
   constructor(
-    @InjectRepository(User)
-    private readonly userRepository: Repository<User>,
-    private readonly entityManager: EntityManager
+      @InjectModel(User.name)
+      private readonly userModel: Model<User>,
   ) {}
 
   createUser(createUserDto: CreateUserDto): Promise<User> {
-    const userNew = new User();
-
-    userNew.name = createUserDto.name;
-    userNew.lastName = createUserDto.lastName;
-    userNew.email = createUserDto.email;
-    userNew.number = createUserDto.number;
-    userNew.password = createUserDto.password;
-    userNew.age = createUserDto.age;
-
-    const userRepository = this.entityManager.getRepository(User);
-    return userRepository.save(userNew);
+    const user = new this.userModel(createUserDto);
+    return user.save();
   }
 
   findAll(): Promise<User[]> {
-    const userRepository = this.entityManager.getRepository(User);
-    return userRepository.find();
+    return this.userModel.find().exec();
   }
 
-  async findById(id: string): Promise<User | undefined> {
-    const objectId = new ObjectId(id);
-    return await this.userRepository.findOne({
-      where: { _id: objectId },
-    });
+  findById(id: string): Promise<User> {
+    return this.userModel.findById(id).exec();
   }
 
-  update(id: number, updateUserDto: UpdateUserDto) {
-    return `This action updates a #${id} user`;
+  findByNumber(number: string): Promise<User> {
+    return this.userModel.findOne({ number: number }).exec();
+  }
+
+  updateUser(id: string, updateUserDto: UpdateUserDto): Promise<User> {
+    return this.userModel
+    .findByIdAndUpdate(id, updateUserDto, { new: true })
+    .exec();
   }
 
   async removeUser(id: string): Promise<void> {
-    await this.userRepository.delete(id);
+    await this.userModel.deleteOne({ _id: id }).exec();
   }
+
+  // async register(number: string, password: string) {
+  //   this.userRepository.findOne({
+  //     where: { number: number, password: password }
+  //   });
+
+  //   return `Numero: ${number}, Contraseña ${password}`;
+  // }
 }

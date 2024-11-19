@@ -1,4 +1,4 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete } from '@nestjs/common';
+import { Controller, Get, Post, Body, Patch, Param, Delete, HttpException, HttpStatus } from '@nestjs/common';
 import { UserService } from './user.service';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
@@ -28,6 +28,19 @@ export class UserController {
   async serachForNumber(@Param('number') number: string): Promise<User> {
     const user = await this.userService.findByNumber(number);
     return user;
+  }
+
+  @Post('login')
+  async login(
+    @Body('number') number: string,
+    @Body('password') password: string): Promise<User> {
+      const user = await this.userService.login(number, password);
+      
+      if (!user) {
+        throw new HttpException('Invalid credentials', HttpStatus.UNAUTHORIZED);
+      }
+      
+      return user;
   }
 
   @Patch('update/id/:id')

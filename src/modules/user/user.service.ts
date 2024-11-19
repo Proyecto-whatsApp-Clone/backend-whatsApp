@@ -40,11 +40,8 @@ export class UserService {
     await this.userModel.deleteOne({ _id: id }).exec();
   }
 
-  // async register(number: string, password: string) {
-  //   this.userRepository.findOne({
-  //     where: { number: number, password: password }
-  //   });
+  async login(number: string, password: string): Promise<User> {
+    return this.userModel.findOne({ number: number, password: password }).exec();
+  }
 
-  //   return `Numero: ${number}, Contraseña ${password}`;
-  // }
 }

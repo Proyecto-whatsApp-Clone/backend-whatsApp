@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
 import { User } from './entities/user.entity';
 import { Model } from 'mongoose';
 import { InjectModel } from '@nestjs/mongoose';
@@ -13,7 +13,19 @@ export class UserService {
       private readonly userModel: Model<User>,
   ) {}
 
-  createUser(createUserDto: CreateUserDto): Promise<User> {
+  async createUser(createUserDto: CreateUserDto): Promise<User> {
+    const existingUser = await this.userModel.findOne({ number: createUserDto.number }).exec();
+
+    if (existingUser) {
+      throw new HttpException('El número de teléfono ya está registrado.', HttpStatus.BAD_REQUEST);
+    }
+
+    for (const [value] of Object.entries(createUserDto)) {
+      if (value === null || value === undefined || value === '') {
+        throw new HttpException(`Favor de acompletar el formulario.`, HttpStatus.BAD_REQUEST);
+      }
+    }
+
     const user = new this.userModel(createUserDto);
     return user.save();
   }

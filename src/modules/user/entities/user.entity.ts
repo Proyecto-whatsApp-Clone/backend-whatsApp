@@ -15,11 +15,12 @@ export class User extends Document {
     lastName: string;
 
     @Prop({ 
-        unique: true 
+        required: true
     })
     email: string;
     
     @Prop({
+        required: true,
         unique: true,
         index: true
     })

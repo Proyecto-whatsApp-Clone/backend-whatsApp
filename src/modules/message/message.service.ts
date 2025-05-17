@@ -1,26 +1,27 @@
 import { Injectable } from '@nestjs/common';
-import { CreateMessageDto } from './dto/create-message.dto';
-import { UpdateMessageDto } from './dto/update-message.dto';
+import { InjectModel } from '@nestjs/mongoose';
+import { Model } from 'mongoose';
+import { Message } from './entities/message.entity';
 
 @Injectable()
-export class MessageService {
-  create(createMessageDto: CreateMessageDto) {
-    return 'This action adds a new message';
+export class MessagesService {
+  constructor(@InjectModel(Message.name) private messageModel: Model<Message>) {}
+
+  async sendMessage(senderId: string, receiverId: string, content: string): Promise<Message> {
+    const newMessage = new this.messageModel({ senderId, receiverId, content });
+    return newMessage.save();
   }
 
-  findAll() {
-    return `This action returns all message`;
+  async getMessages(senderId: string, receiverId: string): Promise<Message[]> {
+    return this.messageModel.find({
+      $or: [
+        { senderId, receiverId },
+        { senderId: receiverId, receiverId: senderId },
+      ],
+    }).sort({ createdAt: -1 });
   }
 
-  findOne(id: number) {
-    return `This action returns a #${id} message`;
-  }
-
-  update(id: number, updateMessageDto: UpdateMessageDto) {
-    return `This action updates a #${id} message`;
-  }
-
-  remove(id: number) {
-    return `This action removes a #${id} message`;
+  async markAsRead(messageId: string): Promise<Message> {
+    return this.messageModel.findByIdAndUpdate(messageId, { isRead: true }, { new: true });
   }
 }

@@ -1,17 +1,17 @@
 import { Module } from '@nestjs/common';
-import { TypeOrmModule } from '@nestjs/typeorm';
 import { UserModule } from './modules/user/user.module';
-import { MessageModule } from './modules/message/message.module';
-import { ConversationModule } from './modules/conversation/conversation.module';
 import { MongooseModule } from '@nestjs/mongoose';
+import { MessageModule } from './modules/message/message.module';
+import { ConfigModule } from '@nestjs/config';
 
 @Module({
   imports: [
-
-    MongooseModule.forRoot('mongodb://localhost:27017/proyecto-mensaje'),
+    ConfigModule.forRoot({
+      isGlobal: true,
+    }),
+    MongooseModule.forRoot(process.env.MONGO_URI),
     UserModule,
-    // MessageModule,
-    // ConversationModule,
+    MessageModule,
   ],
   controllers: [],
   providers: [],
